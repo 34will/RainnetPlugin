@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +15,7 @@ namespace Rainnet
         private static List<DataMeasure> all = new List<DataMeasure>();
         private static int SessionCount = 0;
 
+        private readonly IntPtr rainmeter;
         private int count = 5;
         private SessionProperty sort = SessionProperty.Speed;
         private bool sortAscending = false;
@@ -22,8 +23,10 @@ namespace Rainnet
         private TraceEventSession session = null;
         private Dictionary<int, DownloadSession> sessionData = new Dictionary<int, DownloadSession>();
 
-        public DataMeasure()
+        public DataMeasure(IntPtr rainmeter)
         {
+            this.rainmeter = rainmeter;
+
             sessionName = SessionId + SessionCount++;
             all.Add(this);
         }
@@ -45,7 +48,10 @@ namespace Rainnet
             count = Math.Max(0, api.ReadInt("Count", 5));
 
             if (!(TraceEventSession.IsElevated() ?? false))
-                API.Log(API.LogType.Error, $"Rainnet.dll: Not elevated");
+            {
+                API.Log(rainmeter, API.LogType.Error, "Rainnet.dll: Not elevated");
+                return;
+            }
 
             session?.Dispose();
             session = new TraceEventSession(sessionName);

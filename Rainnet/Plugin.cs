@@ -16,10 +16,10 @@ namespace Rainnet
 
             string parent = api.ReadString(OutputMeasure.ParentParameter, "");
             Measure measure;
-            if (String.IsNullOrEmpty(parent))
-                measure = new DataMeasure();
+            if (string.IsNullOrEmpty(parent))
+                measure = new DataMeasure(rm);
             else
-                measure = new OutputMeasure();
+                measure = new OutputMeasure(rm);
 
             data = GCHandle.ToIntPtr(GCHandle.Alloc(measure));
         }

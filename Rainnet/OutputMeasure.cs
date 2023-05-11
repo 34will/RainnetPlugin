@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Rainmeter;
@@ -9,9 +10,16 @@ namespace Rainnet
     {
         public static readonly string ParentParameter = "DataMeasure";
 
+        private readonly IntPtr rainmeter;
+
         private DataMeasure parent = null;
         private SessionProperty property = SessionProperty.Speed;
         private string contents = "";
+
+        public OutputMeasure(IntPtr rainmeter)
+        {
+            this.rainmeter = rainmeter;
+        }
 
         public override void Reload(API api, ref double maxValue)
         {
@@ -21,7 +29,7 @@ namespace Rainnet
 
             parent = DataMeasure.GetMeasure(parentName, Skin);
             if (parent == null)
-                API.Log(API.LogType.Error, $"Rainnet.dll: {ParentParameter} = {parentName} not valid");
+                API.Log(rainmeter, API.LogType.Error, $"Rainnet.dll: {ParentParameter} = {parentName} not valid");
 
             property = DataMeasure.ReadSessionProperty(api, "Property");
         }
