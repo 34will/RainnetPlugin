@@ -12,16 +12,17 @@ namespace Rainnet
     public class DataMeasure : Measure
     {
         private static readonly string SessionId = "rainnet-datameasure-";
-        private static List<DataMeasure> all = new List<DataMeasure>();
+        private static readonly List<DataMeasure> all = new List<DataMeasure>();
         private static int SessionCount = 0;
 
         private readonly IntPtr rainmeter;
+        private readonly Dictionary<int, DownloadSession> sessionData = new Dictionary<int, DownloadSession>();
+        private readonly string sessionName = "";
+
         private int count = 5;
         private SessionProperty sort = SessionProperty.Speed;
         private bool sortAscending = false;
-        private readonly string sessionName = "";
         private TraceEventSession session = null;
-        private Dictionary<int, DownloadSession> sessionData = new Dictionary<int, DownloadSession>();
 
         public DataMeasure(IntPtr rainmeter)
         {
