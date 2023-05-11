@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Rainnet
+﻿namespace Rainnet
 {
     public enum SessionProperty
     {
@@ -14,10 +12,10 @@ namespace Rainnet
     {
         private long oldTotal = 0;
 
-        public DownloadSession(int PID, long initialTotal)
+        public DownloadSession(int PID, string processName, long initialTotal)
         {
             this.PID = PID;
-            ProcessName = Process.GetProcessById(PID).ProcessName;
+            ProcessName = processName;
             Total = initialTotal;
         }
 

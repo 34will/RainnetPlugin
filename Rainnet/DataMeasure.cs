@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Diagnostics.Tracing;
@@ -21,6 +22,7 @@ namespace Rainnet
 
         private int count = 5;
         private SessionProperty sort = SessionProperty.Speed;
+        private GroupProperty group = GroupProperty.PID;
         private bool sortAscending = false;
         private TraceEventSession session = null;
 
@@ -43,6 +45,8 @@ namespace Rainnet
             base.Reload(api, ref maxValue);
 
             sort = ReadSessionProperty(api, "Sort");
+
+            group = ReadGroupProperty(api, "Group");
 
             sortAscending = api.ReadInt("SortAscending", 0) == 1;
 
@@ -73,13 +77,16 @@ namespace Rainnet
                 {
                     int pidIndex = e.PayloadIndex("PID");
                     int pid = (int)e.PayloadValue(pidIndex);
+                    string processName = Process.GetProcessById(pid).ProcessName;
                     int bytes = (int)e.PayloadValue(sizeIndex);
+                    int lookup = group == GroupProperty.PID ? pid : processName.GetHashCode();
+
                     lock (sessionData)
                     {
-                        if (sessionData.TryGetValue(pid, out DownloadSession info))
+                        if (sessionData.TryGetValue(lookup, out DownloadSession info))
                             info.AddTotal(bytes);
                         else
-                            sessionData[pid] = new DownloadSession(pid, (int)e.PayloadValue(sizeIndex));
+                            sessionData[lookup] = new DownloadSession(pid, processName, (int)e.PayloadValue(sizeIndex));
                     }
                 }
                 catch { }
@@ -160,8 +167,26 @@ namespace Rainnet
             }
         }
 
+        public static GroupProperty ReadGroupProperty(API api, string propertyName)
+        {
+            string sort = api.ReadString(propertyName, "");
+            switch (sort.ToLower())
+            {
+                case "name":
+                    return GroupProperty.Name;
+                default:
+                    return GroupProperty.PID;
+            }
+        }
+
         // ----- Properties ----- //
 
         public IEnumerable<DownloadSession> Data { get; private set; }
+    }
+
+    public enum GroupProperty
+    {
+        PID = 0,
+        Name = 1
     }
 }
